@@ -138,7 +138,3 @@ class Protein(AbstractSequence):
     def mass(self):
         return sum(genetic_code.single_letter_to_mass[aa] for aa in self)
 
-
-if __name__ == '__main__':
-    print(RNA("AACUGAUGAAAUUUCCCUGA").translation().mass())
-    # print(Protein("").alphabet)

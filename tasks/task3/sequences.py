@@ -4,26 +4,52 @@ Amino Acid masses are taken from https://ru.webqc.org/aminoacids.php
 """
 
 from abc import ABC, abstractmethod
-from collections import Counter, Sequence
+from collections import Counter, Sequence, namedtuple
+import random
 
 from tasks.task3 import genetic_code
 
 
-class AbstractSequence(ABC, Sequence):
-    def __init__(self, alphabet, seq_type, sequence, ):
-        assert all(ch in alphabet for ch in sequence)
+SequenceTypeMetadata = namedtuple("SequenceTypeMetadata", "alphabet sequence_type")
 
-        self.__alphabet = alphabet
-        self.__seq_type = seq_type
+
+class RandomGenerator:
+    def __init__(self, sequence_class: type):
+        assert issubclass(sequence_class, AbstractSequence)
+        assert sequence_class is not AbstractSequence
+
+        self.__sequence_class = sequence_class
+        self.__metadata = sequence_class.metadata
+        assert isinstance(self.__metadata, SequenceTypeMetadata)
+
+    def letter(self):
+        return random.choice(self.__metadata.alphabet)
+
+    def sequence(self, length = 1000):
+        seq = ''.join(self.letter() for _ in range(length))
+        return self.__sequence_class(seq)
+
+    def sequence_rand_len(self, min_len = 10, max_len = 1000):
+        return self.sequence(random.randint(min_len, max_len))
+
+
+class AbstractSequence(ABC, Sequence):
+    metadata: SequenceTypeMetadata
+    generator: RandomGenerator
+
+    def __init__(self, metadata: SequenceTypeMetadata, sequence, ):
+        assert all(ch in metadata.alphabet for ch in sequence)
+
+        self.__metadata = metadata
         self.__sequence = sequence
 
     @property
     def alphabet(self):
-        return self.__alphabet
+        return self.__metadata.alphabet
 
     @property
     def seq_type(self):
-        return self.__seq_type
+        return self.__metadata.sequence_type
 
     @property
     def sequence(self):
@@ -47,21 +73,21 @@ class AbstractSequence(ABC, Sequence):
         pass
 
     def __repr__(self):
-        return "{}({})".format(self.__seq_type, self.__sequence)
+        return "{}({})".format(self.__metadata.sequence_type, self.__sequence)
 
     def __eq__(self, other):
         if not isinstance(other, AbstractSequence):
             return False
-        return self.__alphabet == other.__alphabet \
-                and self.__sequence == other.__sequence \
-                and self.__seq_type == other.__seq_type
+        return self.__metadata == other.__metadata \
+                and self.__sequence == other.__sequence
 
 
 class DNA(AbstractSequence):
+    metadata = SequenceTypeMetadata("ACGT", "DNA")
+
     def __init__(self, sequence):
         super(DNA, self).__init__(
-            alphabet = "ACGT",
-            seq_type = "DNA",
+            DNA.metadata,
             sequence = sequence
         )
 
@@ -82,10 +108,11 @@ class DNA(AbstractSequence):
 
 
 class RNA(AbstractSequence):
+    metadata = SequenceTypeMetadata("ACGU", "RNA")
+
     def __init__(self, sequence):
         super(RNA, self).__init__(
-            alphabet = "ACGU",
-            seq_type = "RNA",
+            RNA.metadata,
             sequence = sequence
         )
 
@@ -126,14 +153,18 @@ class TranslationException(Exception):
 
 
 class Protein(AbstractSequence):
+    metadata = SequenceTypeMetadata([aa.single_letter for aa in genetic_code.AA_to_RNA.keys()], "Protein")
+
     def __init__(self, sequence):
-        alphabet = set(aa.single_letter for aa in genetic_code.AA_to_RNA.keys() if isinstance(aa, genetic_code.AminoAcid))
         super(Protein, self).__init__(
-            alphabet = alphabet,
-            seq_type = "Protein",
+            metadata = Protein.metadata,
             sequence = sequence
         )
 
     def mass(self):
         return sum(genetic_code.single_letter_to_mass[aa] for aa in self)
 
+
+DNA.generator = RandomGenerator(DNA)
+RNA.generator = RandomGenerator(RNA)
+Protein.generator = RandomGenerator(Protein)

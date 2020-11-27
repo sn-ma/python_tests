@@ -1,3 +1,4 @@
+import collections
 import unittest
 
 from tasks.task3.sequences import DNA, RNA, Protein
@@ -37,6 +38,12 @@ class TestSequences(unittest.TestCase):
         self.assertEqual("MAY", protein.sequence)
         self.assertEqual("Protein", protein.seq_type)
         self.assertEqual(20, len(protein.alphabet))
+
+    def test_sequence(self):
+        dna = DNA("GATTACA")
+        self.assertTrue(all(n in dna for n in "ACGT"))
+        self.assertEqual(list("ACATTAG"), list(reversed(dna)))
+        self.assertTrue(isinstance(dna, collections.Sequence))
 
 
 if __name__ == "__main__":

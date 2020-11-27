@@ -4,12 +4,12 @@ Amino Acid masses are taken from https://ru.webqc.org/aminoacids.php
 """
 
 from abc import ABC, abstractmethod
-from collections import Counter
+from collections import Counter, Sequence
 
 from tasks.task3 import genetic_code
 
 
-class AbstractSequence(ABC):
+class AbstractSequence(ABC, Sequence):
     def __init__(self, alphabet, seq_type, sequence, ):
         assert all(ch in alphabet for ch in sequence)
 
@@ -36,9 +36,8 @@ class AbstractSequence(ABC):
     def __len__(self):
         return self.length
 
-    def __iter__(self):
-        for ch in self.__sequence:
-            yield ch
+    def __getitem__(self, key):
+        return self.__sequence[key]
 
     def get_stat(self):
         return Counter(self.__sequence)

@@ -45,18 +45,18 @@ class TestSequences(unittest.TestCase):
         self.assertEqual(list("ACATTAG"), list(reversed(dna)))
         self.assertTrue(isinstance(dna, collections.Sequence))
 
-    def test_generator_letter(self):
+    def test_random_letter(self):
         for cls in (DNA, RNA, Protein):
-            self.assertTrue(all(cls.generator.letter() in set(cls.metadata.alphabet) for _ in range(1000)))
+            self.assertTrue(all(cls.random_factory.letter() in set(cls.metadata.alphabet) for _ in range(1000)))
 
-    def test_generator_sequence(self):
-        dna = DNA.generator.sequence()
+    def test_random_sequence(self):
+        dna = DNA.random_factory.sequence()
         self.assertTrue(isinstance(dna, DNA))
         self.assertEqual(1000, len(dna))
 
-    def test_generator_sequence_rand_len(self):
+    def test_random_sequence_rand_len(self):
         for _ in range(100):
-            dna = DNA.generator.sequence_rand_len()
+            dna = DNA.random_factory.sequence_rand_len()
             self.assertTrue(isinstance(dna, DNA))
             self.assertTrue(10 <= len(dna) <= 1000)
 

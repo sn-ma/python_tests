@@ -13,7 +13,7 @@ from tasks.task3 import genetic_code
 SequenceTypeMetadata = namedtuple("SequenceTypeMetadata", "alphabet sequence_type")
 
 
-class RandomGenerator:
+class RandomFactory:
     def __init__(self, sequence_class: type):
         assert issubclass(sequence_class, AbstractSequence)
         assert sequence_class is not AbstractSequence
@@ -35,7 +35,7 @@ class RandomGenerator:
 
 class AbstractSequence(ABC, Sequence):
     metadata: SequenceTypeMetadata
-    generator: RandomGenerator
+    random_factory: RandomFactory
 
     def __init__(self, metadata: SequenceTypeMetadata, sequence, ):
         assert all(ch in metadata.alphabet for ch in sequence)
@@ -165,6 +165,6 @@ class Protein(AbstractSequence):
         return sum(genetic_code.single_letter_to_mass[aa] for aa in self)
 
 
-DNA.generator = RandomGenerator(DNA)
-RNA.generator = RandomGenerator(RNA)
-Protein.generator = RandomGenerator(Protein)
+DNA.random_factory = RandomFactory(DNA)
+RNA.random_factory = RandomFactory(RNA)
+Protein.random_factory = RandomFactory(Protein)

@@ -129,7 +129,8 @@ class RNA(AbstractSequence):
                 break
         else:
             raise TranslationException("Start code not found")
-        def tripletes():
+
+        def triplets():
             left = start_pos
             while True:
                 right = left + 3
@@ -140,7 +141,7 @@ class RNA(AbstractSequence):
                     return
                 yield triplet
                 left = right
-        protein_sequence = (genetic_code.RNA_to_AA[tr].single_letter for tr in tripletes())
+        protein_sequence = (genetic_code.RNA_to_AA[tr].single_letter for tr in triplets())
         return Protein(''.join(protein_sequence))
 
 

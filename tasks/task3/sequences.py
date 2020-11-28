@@ -6,6 +6,7 @@ Amino Acid masses are taken from https://ru.webqc.org/aminoacids.php
 import random
 from abc import ABC, abstractmethod
 from collections import Counter, Sequence, namedtuple
+from functools import lru_cache
 
 from tasks.task3 import genetic_code
 
@@ -33,8 +34,6 @@ class RandomFactory:
 
 
 class AbstractSequence(ABC, Sequence):
-    random_factory: RandomFactory
-
     def __init__(self, sequence):
         assert all(ch in self.metadata().alphabet for ch in sequence)
 
@@ -44,6 +43,11 @@ class AbstractSequence(ABC, Sequence):
     @abstractmethod
     def metadata() -> SequenceTypeMetadata:
         pass
+
+    @classmethod
+    @lru_cache(maxsize = None)
+    def random_factory(cls):
+        return RandomFactory(cls)
 
     @property
     def alphabet(self):
@@ -159,8 +163,3 @@ class Protein(AbstractSequence):
 
     def mass(self):
         return sum(genetic_code.single_letter_to_mass[aa] for aa in self)
-
-
-DNA.random_factory = RandomFactory(DNA)
-RNA.random_factory = RandomFactory(RNA)
-Protein.random_factory = RandomFactory(Protein)

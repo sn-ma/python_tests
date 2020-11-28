@@ -3,9 +3,9 @@ Nucleotid masses is calculated as said in http://biotools.nubic.northwestern.edu
 Amino Acid masses are taken from https://ru.webqc.org/aminoacids.php
 """
 
+import random
 from abc import ABC, abstractmethod
 from collections import Counter, Sequence, namedtuple
-import random
 
 from tasks.task3 import genetic_code
 
@@ -19,11 +19,10 @@ class RandomFactory:
         assert sequence_class is not AbstractSequence
 
         self.__sequence_class = sequence_class
-        self.__metadata = sequence_class.metadata
-        assert isinstance(self.__metadata, SequenceTypeMetadata)
+        self.__alphabet = sequence_class.metadata().alphabet
 
     def letter(self):
-        return random.choice(self.__metadata.alphabet)
+        return random.choice(self.__alphabet)
 
     def sequence(self, length = 1000):
         seq = ''.join(self.letter() for _ in range(length))
@@ -34,22 +33,25 @@ class RandomFactory:
 
 
 class AbstractSequence(ABC, Sequence):
-    metadata: SequenceTypeMetadata
     random_factory: RandomFactory
 
-    def __init__(self, metadata: SequenceTypeMetadata, sequence, ):
-        assert all(ch in metadata.alphabet for ch in sequence)
+    def __init__(self, sequence):
+        assert all(ch in self.metadata().alphabet for ch in sequence)
 
-        self.__metadata = metadata
         self.__sequence = sequence
+
+    @staticmethod
+    @abstractmethod
+    def metadata() -> SequenceTypeMetadata:
+        pass
 
     @property
     def alphabet(self):
-        return self.__metadata.alphabet
+        return self.metadata().alphabet
 
     @property
     def seq_type(self):
-        return self.__metadata.sequence_type
+        return self.metadata().sequence_type
 
     @property
     def sequence(self):
@@ -73,23 +75,20 @@ class AbstractSequence(ABC, Sequence):
         pass
 
     def __repr__(self):
-        return "{}({})".format(self.__metadata.sequence_type, self.__sequence)
+        return "{}({})".format(self.metadata().sequence_type, self.__sequence)
 
     def __eq__(self, other):
-        if not isinstance(other, AbstractSequence):
+        if type(self) is not type(other):
             return False
-        return self.__metadata == other.__metadata \
-                and self.__sequence == other.__sequence
+        return self.__sequence == other.__sequence
 
 
 class DNA(AbstractSequence):
-    metadata = SequenceTypeMetadata("ACGT", "DNA")
+    __metadata = SequenceTypeMetadata("ACGT", "DNA")
 
-    def __init__(self, sequence):
-        super(DNA, self).__init__(
-            DNA.metadata,
-            sequence = sequence
-        )
+    @staticmethod
+    def metadata() -> SequenceTypeMetadata:
+        return DNA.__metadata
 
     __masses = {"A": 313.21, "T": 304.2, "C": 289.18, "G": 329.21}
     __complement = {"A": "T", "G": "C", "T": "A", "C": "G"}
@@ -108,13 +107,11 @@ class DNA(AbstractSequence):
 
 
 class RNA(AbstractSequence):
-    metadata = SequenceTypeMetadata("ACGU", "RNA")
+    __metadata = SequenceTypeMetadata("ACGU", "RNA")
 
-    def __init__(self, sequence):
-        super(RNA, self).__init__(
-            RNA.metadata,
-            sequence = sequence
-        )
+    @staticmethod
+    def metadata() -> SequenceTypeMetadata:
+        return RNA.__metadata
 
     __masses = {"A": 329.21, "U": 306.17, "C": 305.18, "G": 345.21}
     __complement = {"A": "U", "G": "C", "U": "A", "C": "G"}
@@ -153,13 +150,11 @@ class TranslationException(Exception):
 
 
 class Protein(AbstractSequence):
-    metadata = SequenceTypeMetadata([aa.single_letter for aa in genetic_code.AA_to_RNA.keys()], "Protein")
+    __metadata = SequenceTypeMetadata([aa.single_letter for aa in genetic_code.AA_to_RNA.keys()], "Protein")
 
-    def __init__(self, sequence):
-        super(Protein, self).__init__(
-            metadata = Protein.metadata,
-            sequence = sequence
-        )
+    @staticmethod
+    def metadata() -> SequenceTypeMetadata:
+        return Protein.__metadata
 
     def mass(self):
         return sum(genetic_code.single_letter_to_mass[aa] for aa in self)

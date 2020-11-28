@@ -47,7 +47,7 @@ class TestSequences(unittest.TestCase):
 
     def test_random_letter(self):
         for cls in (DNA, RNA, Protein):
-            self.assertTrue(all(cls.random_factory.letter() in set(cls.metadata.alphabet) for _ in range(1000)))
+            self.assertTrue(all(cls.random_factory.letter() in set(cls.metadata().alphabet) for _ in range(1000)))
 
     def test_random_sequence(self):
         dna = DNA.random_factory.sequence()

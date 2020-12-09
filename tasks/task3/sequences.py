@@ -86,6 +86,16 @@ class AbstractSequence(ABC, Sequence):
             return False
         return self.__sequence == other.__sequence
 
+    def map(self, foo):
+        return type(self)(''.join(map(foo, self)))
+
+    def map2(self, foo):
+        def prev_letter():
+            yield None
+            for letter in self:
+                yield letter
+        return type(self)(''.join(map(foo, prev_letter(), self)))
+
 
 class DNA(AbstractSequence):
     __metadata = SequenceTypeMetadata("ACGT", "DNA")

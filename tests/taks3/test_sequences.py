@@ -60,6 +60,16 @@ class TestSequences(unittest.TestCase):
             self.assertTrue(isinstance(dna, DNA))
             self.assertTrue(10 <= len(dna) <= 1000)
 
+    def test_map(self):
+        foo = lambda letter: 'G' if letter == 'A' else letter
+        dna = DNA("GATTACA")
+        self.assertEqual(DNA("GGTTGCG"), dna.map(foo))
+
+    def test_map2(self):
+        foo = lambda prev, current: 'G' if current == 'A' and prev == "T" else current
+        dna = DNA("GATTACA")
+        self.assertEqual(DNA("GATTGCA"), dna.map2(foo))
+
 
 if __name__ == "__main__":
     unittest.main()

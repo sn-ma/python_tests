@@ -34,15 +34,19 @@ class RandomFactory:
 
 
 class AbstractSequence(ABC, Sequence):
+    """
+    Note: to implement a concrete sequence class, you should override class field _metadata and method mass(self)
+    """
     def __init__(self, sequence):
         assert all(ch in self.metadata().alphabet for ch in sequence)
 
         self.__sequence = sequence
 
-    @staticmethod
-    @abstractmethod
-    def metadata() -> SequenceTypeMetadata:
-        pass
+    _metadata: SequenceTypeMetadata
+
+    @classmethod
+    def metadata(cls) -> SequenceTypeMetadata:
+        return cls._metadata
 
     @classmethod
     @lru_cache(maxsize = None)
@@ -98,11 +102,7 @@ class AbstractSequence(ABC, Sequence):
 
 
 class DNA(AbstractSequence):
-    __metadata = SequenceTypeMetadata("ACGT", "DNA")
-
-    @staticmethod
-    def metadata() -> SequenceTypeMetadata:
-        return DNA.__metadata
+    _metadata = SequenceTypeMetadata("ACGT", "DNA")
 
     __masses = {"A": 313.21, "T": 304.2, "C": 289.18, "G": 329.21}
     __complement = {"A": "T", "G": "C", "T": "A", "C": "G"}
@@ -121,11 +121,7 @@ class DNA(AbstractSequence):
 
 
 class RNA(AbstractSequence):
-    __metadata = SequenceTypeMetadata("ACGU", "RNA")
-
-    @staticmethod
-    def metadata() -> SequenceTypeMetadata:
-        return RNA.__metadata
+    _metadata = SequenceTypeMetadata("ACGU", "RNA")
 
     __masses = {"A": 329.21, "U": 306.17, "C": 305.18, "G": 345.21}
     __complement = {"A": "U", "G": "C", "U": "A", "C": "G"}
@@ -165,11 +161,7 @@ class TranslationException(Exception):
 
 
 class Protein(AbstractSequence):
-    __metadata = SequenceTypeMetadata([aa.single_letter for aa in genetic_code.AA_to_RNA.keys()], "Protein")
-
-    @staticmethod
-    def metadata() -> SequenceTypeMetadata:
-        return Protein.__metadata
+    _metadata = SequenceTypeMetadata([aa.single_letter for aa in genetic_code.AA_to_RNA.keys()], "Protein")
 
     def mass(self):
         return sum(genetic_code.single_letter_to_mass[aa] for aa in self)

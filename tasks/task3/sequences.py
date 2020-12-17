@@ -88,7 +88,7 @@ class AbstractSequence(ABC, Sequence):
         pass
 
     def __repr__(self):
-        return "{}({})".format(self.metadata().sequence_type, self.__sequence)
+        return "{} \"{}\" ({})".format(self.metadata().sequence_type, self.__name, self.__sequence)
 
     def __eq__(self, other):
         if type(self) is not type(other):

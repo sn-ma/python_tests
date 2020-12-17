@@ -37,10 +37,11 @@ class AbstractSequence(ABC, Sequence):
     """
     Note: to implement a concrete sequence class, you should override class field _metadata and method mass(self)
     """
-    def __init__(self, sequence):
+    def __init__(self, sequence: str, name: str = None):
         assert all(ch in self.metadata().alphabet for ch in sequence)
 
         self.__sequence = sequence
+        self.__name = name if name else "Unknown " + self.seq_type
 
     _metadata: SequenceTypeMetadata
 
@@ -60,6 +61,10 @@ class AbstractSequence(ABC, Sequence):
     @property
     def seq_type(self):
         return self.metadata().sequence_type
+
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def sequence(self):

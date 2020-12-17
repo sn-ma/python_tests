@@ -6,7 +6,7 @@ from tasks.task3.sequences import DNA, RNA, Protein
 
 class TestSequences(unittest.TestCase):
     def test_dna(self):
-        dna = DNA("GATTACA")
+        dna = DNA("GATTACA", name = "Cool DNA")
         self.assertEqual(set("ACGT"), set(dna.alphabet))
         self.assertEqual("DNA", dna.seq_type)
         self.assertEqual("GATTACA", dna.sequence)
@@ -17,6 +17,7 @@ class TestSequences(unittest.TestCase):
         self.assertFalse(dna == DNA("GAT"))
         self.assertEqual(DNA("TGTAATC"), dna.revc())
         self.assertEqual(RNA("UGUAAUC"), dna.transcription())
+        self.assertEqual("Cool DNA", dna.name)
 
     def test_rna(self):
         rna = RNA("GAUUACA")

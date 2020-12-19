@@ -35,6 +35,8 @@ class RandomFactory:
 
 class AbstractSequence(ABC, Sequence):
     """
+    Warning: equality only checks same type and same sequence, names are ignored!
+
     Note: to implement a concrete sequence class, you should override class field _metadata and method mass(self)
     """
     def __init__(self, sequence: str, name: str = None):
@@ -94,6 +96,9 @@ class AbstractSequence(ABC, Sequence):
         if type(self) is not type(other):
             return False
         return self.__sequence == other.__sequence
+
+    def __hash__(self):
+        return hash(self.__sequence)
 
     def map(self, foo):
         return type(self)(''.join(map(foo, self)))

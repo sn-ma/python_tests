@@ -5,7 +5,8 @@ Amino Acid masses are taken from https://ru.webqc.org/aminoacids.php
 
 import random
 from abc import ABC, abstractmethod
-from collections import Counter, Sequence, namedtuple
+from collections import Counter, namedtuple
+from collections.abc import Sequence
 from functools import lru_cache
 
 from tasks.task3 import genetic_code
@@ -21,16 +22,31 @@ class RandomFactory:
 
         self.__sequence_class = sequence_class
         self.__alphabet = sequence_class.metadata().alphabet
+        self.__seq_type = sequence_class.metadata().sequence_type
+        self.__count = 0
 
     def letter(self):
         return random.choice(self.__alphabet)
 
     def sequence(self, length = 1000):
-        seq = ''.join(self.letter() for _ in range(length))
-        return self.__sequence_class(seq)
+        seq = ''.join(random.choices(self.__alphabet, k = length))
+        self.__count += 1
+        return self.__sequence_class(seq, "Random {} #{}".format(self.__seq_type, self.__count))
 
     def sequence_rand_len(self, min_len = 10, max_len = 1000):
         return self.sequence(random.randint(min_len, max_len))
+
+    def gen_letters(self):
+        while True:
+            yield self.letter()
+
+    def gen_sequences_fix_len(self, length = 1000):
+        while True:
+            yield self.sequence(length)
+
+    def gen_sequences_rand_len(self, min_len = 10, max_len = 1000):
+        while True:
+            yield self.sequence_rand_len(min_len, max_len)
 
 
 class AbstractSequence(ABC, Sequence):

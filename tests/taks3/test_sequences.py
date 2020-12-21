@@ -2,6 +2,7 @@ import collections
 import unittest
 
 from tasks.task3.sequences import DNA, RNA, Protein
+from tasks.snma_tools import take_n
 
 
 class TestSequences(unittest.TestCase):
@@ -60,6 +61,14 @@ class TestSequences(unittest.TestCase):
             dna = DNA.random_factory().sequence_rand_len()
             self.assertTrue(isinstance(dna, DNA))
             self.assertTrue(10 <= len(dna) <= 1000)
+
+    def test_generators(self):
+        self.assertTrue(all(ch in DNA.metadata().alphabet for ch in take_n(DNA.random_factory().gen_letters())))
+
+        dna_lst = list(take_n(DNA.random_factory().gen_sequences_rand_len(), 100))
+        self.assertEqual(100, len(dna_lst))
+        self.assertTrue(all(isinstance(dna, DNA) for dna in dna_lst))
+        self.assertTrue(all(10 <= len(dna) <= 1000 for dna in dna_lst))
 
     def test_map(self):
         foo = lambda letter: 'G' if letter == 'A' else letter
